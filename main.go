@@ -6,12 +6,14 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log"
 	"os"
 	"strings"
 	"sync"
 	"time"
+	"flag"
+	"strconv"
 
+	log "github.com/sirupsen/logrus"
 	"github.com/secsy/goftp"
 )
 
@@ -21,10 +23,35 @@ func main() {
 	fmt.Println("FTPS Download -", initConfig.Title)
 	fmt.Println(initConfig)
 
+	verbose := flag.Bool("v", false, "Verbose Logging (Info Level)")
+	flag.Parse()
+	IsVerbose = *verbose
+	log.WithField("verbose", *verbose).Info("cmd line flags parsed output")
+
+	// Log as JSON instead of the default ASCII formatter.
+	log.SetFormatter(&log.TextFormatter{})
+
+	f, err := os.OpenFile(Name+".log", os.O_APPEND|os.O_CREATE|os.O_RDWR, 0666)
+	if err != nil {
+		fmt.Printf("error opening file: %v", err)
+	}
+
+	// Output to stderr instead of stdout, could also be a file.
+	log.SetOutput(f)
+
+	// Only log the warning severity or above.
+	log.SetLevel(log.WarnLevel)
+
+	if IsVerbose {
+		log.SetLevel(log.TraceLevel)
+		log.SetOutput(os.Stdout)
+	}
+
 	//Endless for loop to repeat download
 	//for {
 	StartFtpDownload(initConfig)
 	//}
+	
 }
 
 //StartFtpDownload - initiate the FTP download
