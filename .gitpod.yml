@@ -2,6 +2,7 @@ tasks:
   - name: install go & aws cli
     init: |
       echo init
+      
     command: |
       echo command
       sudo apt -y install golang
@@ -9,3 +10,9 @@ tasks:
       unzip awscliv2.zip
       sudo ./aws/install
       clear
+      go get && go build ./... && go test ./...
+      go run .
+      
+vscode:
+  extensions:
+    - golang.Go
